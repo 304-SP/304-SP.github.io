@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sala do Futuro</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; transition: all 0.25s ease-in-out; }
+        body { background-color: #f0f3f8; color: #333; padding: 24px; overflow-x: hidden; }
+        .dashboard-container { max-width: 1200px; margin: 0 auto; animation: fadeInUp 0.6s ease forwards; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-card { background: #fff; border-radius: 16px; padding: 16px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 16px; margin-bottom: 24px; position: relative; }
+        .menu-toggle { cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #162f67; }
+        .menu-toggle:hover { background: rgba(22, 47, 103, 0.08); }
+        
+        .MuiAvatar-root { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700; font-size: 18px; background: linear-gradient(135deg, #2254D4, #1b66c9); color: white; box-shadow: 0 4px 10px rgba(34, 84, 212, 0.3); }
+        .header-info h2 { font-size: 20px; color: #162f67; font-weight: 700; }
+        .header-info p { font-size: 13px; color: #666; }
+
+        .main-layout { display: flex; gap: 24px; flex-wrap: wrap; }
+        .left-column { flex: 1.3; min-width: 320px; display: flex; flex-direction: column; gap: 18px; }
+        .right-column { flex: 1; min-width: 320px; }
+        .cards-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; }
+
+        .MuiCard-root { background: #fff; border-radius: 16px; padding: 20px; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; position: relative; overflow: hidden; }
+        .MuiCard-root:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
+        .card-number { font-size: 36px; font-weight: 700; margin-bottom: 2px; }
+        .card-label { font-size: 13px; font-weight: 500; opacity: 0.9; }
+
+        .pendencias { color: #d85c00; background: #fff6eb; }
+        .mensagens { color: #2254D4; background: #eef2ff; }
+        
+        .faltas-container { display: flex; align-items: center; gap: 20px; cursor: default; }
+        .faltas-container:hover { transform: none; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .faltas-number { color: #d32f2f; font-size: 36px; font-weight: bold; }
+        .faltas-text { font-size: 14px; color: #162f67; }
+
+        .boletim-card, .conquistas-card, .platform-box { display: flex; align-items: center; justify-content: space-between; }
+        .card-block-left { display: flex; align-items: center; gap: 16px; }
+        .boletim-title { font-weight: 700; font-size: 16px; color: #162f67; }
+        .boletim-subtitle { color: #666; font-size: 13px; margin-top: 2px; }
+        .pesquisas-card { color: #555; font-size: 14px; cursor: default; background: #fafafa; }
+        .pesquisas-card:hover { transform: none; }
+
+        .agenda-card { cursor: default; height: 100%; }
+        .agenda-card:hover { transform: none; }
+        .agenda-title { font-size: 18px; color: #162f67; font-weight: 700; margin-bottom: 16px; }
+        .agenda-item { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f0f0f0; }
+        .agenda-item:last-child { border-bottom: none; }
+        .agenda-date { text-align: center; min-width: 50px; background: #eef2ff; padding: 6px; border-radius: 8px; }
+        .agenda-date p { color: #2254D4; font-weight: 700; font-size: 14px; }
+        .agenda-date span { font-size: 11px; color: #666; font-weight: 500; text-transform: uppercase; }
+        .agenda-info p { font-weight: 500; font-size: 14px; color: #222; }
+        .agenda-info span { font-size: 12px; color: #666; margin-top: 2px; display: block; }
+
+        .platforms-section { margin-top: 32px; }
+        .platforms-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .platforms-header h3 { color: #162f67; font-size: 18px; }
+        .btn-all { background: none; border: none; color: #2254D4; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 8px; }
+        .btn-all:hover { background: rgba(34, 84, 212, 0.05); }
+
+        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 100; opacity: 0; pointer-events: none; }
+        .drawer { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: #fff; z-index: 101; box-shadow: 4px 0 20px rgba(0,0,0,0.1); padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+        .drawer.open { left: 0; }
+        .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 16px; color: #162f67; }
+        .drawer-menu-item { display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 8px; cursor: pointer; color: #555; font-weight: 500; }
+        .drawer-menu-item:hover, .drawer-menu-item.active { background: #eef2ff; color: #2254D4; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
+        .modal { background: #fff; padding: 28px; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transform: scale(0.8); }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-overlay.open .modal { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; color: #162f67; }
+        .modal-close { cursor: pointer; color: #888; }
+        .modal-close:hover { color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+<div class="drawer" id="sidebarDrawer">
+    <div class="drawer-header">
+        <h3>Menu Principal</h3>
+        <span class="material-icons" style="cursor:pointer" onclick="toggleDrawer()">close</span>
+    </div>
+    <div class="drawer-menu-item active"><span class="material-icons">dashboard</span> Início</div>
+    <div class="drawer-menu-item" onclick="logout()"><span class="material-icons">logout</span> Sair</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="modalTitle">Título</h3>
+            <span class="material-icons modal-close" onclick="closeModal()">close</span>
+        </div>
+        <div id="modalBody" style="color: #555; line-height: 1.5;">Conteúdo...</div>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    <div class="header-card">
+        <div class="menu-toggle" onclick="toggleDrawer()"><span class="material-icons" style="font-size: 28px;">menu</span></div>
+        <div class="MuiAvatar-root" id="userAvatar">--</div>
+        <div class="header-info">
+            <h2 id="lblNome">Carregando...</h2>
+            <p id="lblEscola">Buscando dados da escola...</p>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <div class="left-column">
+            <div class="cards-row">
+                <div class="MuiPaper-root MuiPaper-rounded MuiCard-root pendencias" onclick="openModal('Pendências', 'Tarefas do Centro de Mídias pendentes.')">
+                    <p class="card-number">3</p>
+                    <p class="card-label">Pendências</p>
+                </div>
+                <div class="MuiPaper-root MuiPaper-rounded MuiCard-root mensagens" onclick="openModal('Mensagens', 'Verifique a caixa de entrada para avisos institucionais.')">
+                    <p class="card-number">2</p>
+                    <p class="card-label">Mensagens não lidas</p>
+                </div>
+            </div>
+
+            <div class="MuiPaper-root MuiPaper-rounded MuiCard-root faltas-container">
+                <div>
+                    <p class="faltas-number" id="lblFaltas">--</p>
+                    <p class="card-label">Faltas</p>
+                </div>
+                <div class="faltas-text" id="lblPresencaTexto">Carregando frequência...</div>
+            </div>
+
+            <div class="MuiPaper-root MuiPaper-rounded MuiCard-root boletim-card" onclick="openModal('Boletim', 'Consulte suas notas parciais do bimestre no diário de classe.')">
+                <div>
+                    <p class="boletim-title">Boletim</p>
+                    <p class="boletim-subtitle">Clique para ver suas notas completas</p>
+                </div>
+                <span class="material-icons" style="color: #2254D4;">chevron_right</span>
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="MuiPaper-root MuiPaper-rounded MuiCard-root agenda-card">
+                <h5 class="agenda-title">Agenda Recente</h5>
+                <div class="agenda-item">
+                    <div class="agenda-date"><p>13/06</p><span>Sáb</span></div>
+                    <div class="agenda-info"><p>Feriado Municipal</p><span>Padroeiro da Cidade</span></div>
+                </div>
+                <div class="agenda-item">
+                    <div class="agenda-date"><p>25/06</p><span>Qui</span></div>
+                    <div class="agenda-info"><p>Estudos Intensivos</p><span>Reforço pedagógico geral</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDrawer() { document.getElementById('sidebarDrawer').classList.toggle('open'); document.getElementById('drawerOverlay').classList.toggle('open'); }
+    function openModal(title, bodyText) { document.getElementById('modalTitle').innerHTML = title; document.getElementById('modalBody').innerHTML = bodyText; document.getElementById('modalOverlay').classList.add('open'); }
+    function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+    function logout() { localStorage.clear(); window.location.href = "index.html"; }
+
+    // Carregar dados reais ao inicializar
+    window.onload = async () => {
+        const nome = localStorage.getItem('user_name');
+        const codigoAluno = localStorage.getItem('user_id');
+        const backendUrl = localStorage.getItem('backend_url');
+
+        if (!codigoAluno || !nome) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        // Define o nome e iniciais no avatar
+        document.getElementById('lblNome').innerText = `Olá, ${nome.split(' ')[0]}`;
+        document.getElementById('userAvatar').innerText = nome.split(' ').map(n => n[0]).slice(0, 2).join('');
+
+        try {
+            const res = await fetch(`${backendUrl}/api/dados-aluno?codigoAluno=${codigoAluno}`);
+            const resData = await res.json();
+
+            // Renderiza dados da turma e escola
+            if(resData.turma && resData.turma.data && resData.turma.data.length > 0) {
+                const info = resData.turma.data[0];
+                document.getElementById('lblEscola').innerHTML = `${info.NomeEscola} &nbsp;•&nbsp; <strong>${info.NumeroSerie}º ${info.IdentificadorTurma}</strong>`;
+            }
+
+            // Renderiza faltas do Aluno
+            if(resData.faltas && resData.faltas.data && resData.faltas.data.length > 0) {
+                const fData = resData.faltas.data[0];
+                document.getElementById('lblFaltas').innerText = fData.totalFaltasBimestre;
+                document.getElementById('lblPresencaTexto').innerHTML = `Sua frequência atual é de <b>${fData.porcentagemFrequencia}%</b> nas aulas.`;
+            }
+        } catch (e) {
+            console.error("Não foi possível sincronizar os dados escolares adicionais", e);
+            document.getElementById('lblEscola').innerText = "Erro ao sincronizar informações escolares.";
+        }
+    };
+</script>
+</body>
+</html>
