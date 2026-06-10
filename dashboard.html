@@ -164,29 +164,36 @@
     function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
     function logout() { localStorage.clear(); window.location.href = "index.html"; }
 
-    // Carregar dados reais ao inicializar
     window.onload = async () => {
         const nome = localStorage.getItem('user_name');
         const codigoAluno = localStorage.getItem('user_id');
         const backendUrl = localStorage.getItem('backend_url');
+        const token = localStorage.getItem('user_token'); // CAPTURA O TOKEN SALVO NO LOGIN
 
-        if (!codigoAluno || !nome) {
+        if (!codigoAluno || !nome || !token) {
             window.location.href = "index.html";
             return;
         }
 
-        // Define o nome e iniciais no avatar
         document.getElementById('lblNome').innerText = `Olá, ${nome.split(' ')[0]}`;
         document.getElementById('userAvatar').innerText = nome.split(' ').map(n => n[0]).slice(0, 2).join('');
 
         try {
-            const res = await fetch(`${backendUrl}/api/dados-aluno?codigoAluno=${codigoAluno}`);
+            // INJETA O TOKEN VIA AUTORIZAÇÃO "BEARER" PARA LIBERAR AS ROTAS DO GOVERNO
+            const res = await fetch(`${backendUrl}/api/dados-aluno?codigoAluno=${codigoAluno}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const resData = await res.json();
 
             // Renderiza dados da turma e escola
             if(resData.turma && resData.turma.data && resData.turma.data.length > 0) {
                 const info = resData.turma.data[0];
                 document.getElementById('lblEscola').innerHTML = `${info.NomeEscola} &nbsp;•&nbsp; <strong>${info.NumeroSerie}º ${info.IdentificadorTurma}</strong>`;
+            } else {
+                document.getElementById('lblEscola').innerText = "Turma não identificada.";
             }
 
             // Renderiza faltas do Aluno
@@ -194,6 +201,9 @@
                 const fData = resData.faltas.data[0];
                 document.getElementById('lblFaltas').innerText = fData.totalFaltasBimestre;
                 document.getElementById('lblPresencaTexto').innerHTML = `Sua frequência atual é de <b>${fData.porcentagemFrequencia}%</b> nas aulas.`;
+            } else {
+                document.getElementById('lblFaltas').innerText = "0";
+                document.getElementById('lblPresencaTexto').innerText = "Frequência não registrada ou 100%.";
             }
         } catch (e) {
             console.error("Não foi possível sincronizar os dados escolares adicionais", e);
