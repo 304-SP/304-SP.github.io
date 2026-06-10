@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sala do Futuro</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+        body { background: #f0f3f8; display: flex; height: 100vh; justify-content: center; align-items: center; }
+        .login-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
+        h2 { color: #162f67; margin-bottom: 8px; font-weight: 700; }
+        p { color: #666; font-size: 14px; margin-bottom: 24px; }
+        .input-group { margin-bottom: 16px; text-align: left; }
+        label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 500; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; transition: all 0.2s; }
+        input:focus { border-color: #2254D4; outline: none; box-shadow: 0 0 0 3px rgba(34, 84, 212, 0.15); }
+        button { width: 100%; padding: 12px; background: #2254D4; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 12px; transition: background 0.2s; }
+        button:hover { background: #1b66c9; }
+        #error-msg { color: #d32f2f; font-size: 13px; margin-top: 12px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h2>Sala do Futuro</h2>
+    <p>Acesse com seu RA e senha da SED</p>
+    
+    <div class="input-group">
+        <label for="username">Usuário (Ex: 1142842137SP)</label>
+        <input type="text" id="username" placeholder="Digite seu usuário">
+    </div>
+    
+    <div class="input-group">
+        <label for="password">Senha</label>
+        <input type="password" id="password" placeholder="Digite sua senha">
+    </div>
+    
+    <button onclick="handleLogin()">Entrar</button>
+    <div id="error-msg">Usuário ou senha incorretos.</div>
+</div>
+
+<script>
+    // ALTERE AQUI: Coloque a URL gerada pelo Render (sem a barra "/" no final)
+    const BACKEND_URL = "SUA_URL_DO_RENDER_AQUI";
+
+    async function handleLogin() {
+        const userIn = document.getElementById('username').value;
+        const senhaIn = document.getElementById('password').value;
+        const errorDiv = document.getElementById('error-msg');
+        
+        errorDiv.style.display = 'none';
+
+        if(!userIn || !senhaIn) {
+            errorDiv.innerText = "Preencha todos os campos.";
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: userIn, senha: senhaIn })
+            });
+
+            const data = await response.json();
+
+            if (data.statusCode === 200 && data.DadosUsuario) {
+                // Salva os dados retornados no navegador para usar na proxima pagina
+                localStorage.setItem('user_name', data.DadosUsuario.NAME);
+                localStorage.setItem('user_id', data.DadosUsuario.CD_USUARIO);
+                localStorage.setItem('backend_url', BACKEND_URL); // repassa para o dashboard saber onde buscar
+                
+                // Redireciona para o painel de forma limpa
+                window.location.href = "dashboard.html";
+            } else {
+                errorDiv.innerText = "Falha no login. Verifique suas credenciais.";
+                errorDiv.style.display = 'block';
+            }
+        } catch (error) {
+            errorDiv.innerText = "Erro ao conectar ao servidor proxy.";
+            errorDiv.style.display = 'block';
+            console.error(error);
+        }
+    }
+</script>
+
+</body>
+</html>
