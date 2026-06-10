@@ -41,7 +41,6 @@
 </div>
 
 <script>
-    // ALTERE AQUI: Coloque a URL gerada pelo Render (sem a barra "/" no final)
     const BACKEND_URL = "https://three04-sp-github-io-backend.onrender.com";
 
     async function handleLogin() {
@@ -67,10 +66,11 @@
             const data = await response.json();
 
             if (data.statusCode === 200 && data.DadosUsuario) {
-                // Salva os dados retornados no navegador para usar na proxima pagina
+                // SALVA O TOKEN DO ALUNO E OS DADOS ESSENCIAIS NO LOCALSTORAGE
+                localStorage.setItem('user_token', data.token);
                 localStorage.setItem('user_name', data.DadosUsuario.NAME);
                 localStorage.setItem('user_id', data.DadosUsuario.CD_USUARIO);
-                localStorage.setItem('backend_url', BACKEND_URL); // repassa para o dashboard saber onde buscar
+                localStorage.setItem('backend_url', BACKEND_URL);
                 
                 // Redireciona para o painel de forma limpa
                 window.location.href = "dashboard.html";
